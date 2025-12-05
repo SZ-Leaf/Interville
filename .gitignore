@@ -2,8 +2,48 @@
 Server/vendor/
 Server/var/
 Server/.env
+Server/.env.local
+Server/.env.*.local
+Server/.env.local.php
+Server/public/bundles/
+Server/config/secrets/prod/prod.decrypt.private.php
 
 ### Node / React ###
 Client/node_modules/
 Client/build/
+Client/dist/
 Client/.env
+Client/.env.local
+Client/.env.*.local
+Client/.next/
+Client/.nuxt/
+Client/.cache/
+
+### IDE / Editor ###
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.phpstorm.meta.php
+
+### OS ###
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Logs ###
+*.log
+logs/
+
+### Testing ###
+.phpunit.cache/
+phpunit.xml.cache
+phpunit.result.cache
+coverage/
+
+### Temporary files ###
+*.tmp
+*.temp
+.env.backup
