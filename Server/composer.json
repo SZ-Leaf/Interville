@@ -7,14 +7,26 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/doctrine-bundle": "^3.1",
+        "doctrine/doctrine-migrations-bundle": "^3.7",
+        "doctrine/orm": "^3.5",
+        "nelmio/cors-bundle": "^2.6",
+        "phpdocumentor/reflection-docblock": "^5.6",
+        "phpstan/phpdoc-parser": "^2.3",
         "symfony/console": "8.0.*",
         "symfony/dotenv": "8.0.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "8.0.*",
+        "symfony/property-access": "8.0.*",
+        "symfony/property-info": "8.0.*",
         "symfony/runtime": "8.0.*",
-        "symfony/yaml": "8.0.*"
+        "symfony/security-bundle": "8.0.*",
+        "symfony/serializer": "8.0.*",
+        "symfony/yaml": "8.0.*",
+        "web-token/jwt-bundle": "^4.1"
     },
     "require-dev": {
+        "symfony/maker-bundle": "^1.65"
     },
     "config": {
         "allow-plugins": {
@@ -65,7 +77,11 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "8.0.*"
+            "require": "8.0.*",
+            "endpoint": [
+                "https://api.github.com/repos/Spomky-Labs/recipes/contents/index.json?ref=main",
+                "flex://defaults"
+            ]
         }
     }
 }
