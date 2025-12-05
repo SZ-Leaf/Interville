@@ -1,0 +1,9 @@
+### Symfony / PHP ###
+Server/vendor/
+Server/var/
+Server/.env
+
+### Node / React ###
+Client/node_modules/
+Client/build/
+Client/.env
