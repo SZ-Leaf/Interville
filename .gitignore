@@ -13,6 +13,11 @@ Client/node_modules/
 Client/build/
 Client/dist/
 Client/.env
+
+
+### Docker ###
+docker-compose.yaml
+Dockerfile
 Client/.env.local
 Client/.env.*.local
 Client/.next/
