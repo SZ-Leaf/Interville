@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { parseJwt, isTokenValid } from "@/utils/auth";
-import { AuthContext } from "@/context";
+import { AuthContext } from "@/contexts/context";
 
 /**
  * AuthProvider Component
