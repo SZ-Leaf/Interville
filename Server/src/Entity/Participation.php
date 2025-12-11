@@ -8,12 +8,15 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ParticipationRepository::class)]
-#[ORM\Table(uniqueConstraints: [
-    new ORM\UniqueConstraint(
-        name: 'uniq_participation_user_challenge',
-        columns: ['user_id', 'challenge_id']
-    )
-])]
+#[ORM\Table(
+    name: "participations",
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(
+            name: 'uniq_participation_user_challenge',
+            columns: ['user_id', 'challenge_id']
+        )
+    ]
+)]
 class Participation
 {
     #[ORM\Id]
@@ -27,7 +30,7 @@ class Participation
 
     #[ORM\ManyToOne(inversedBy: 'participations')]
     #[ORM\JoinColumn(name: 'user_id', nullable: false, onDelete: 'CASCADE')]
-    private User $participant;
+    private User $user;
 
     #[ORM\Column(type: Types::STRING, enumType: ParticipationStatus::class)]
     private ParticipationStatus $status;
@@ -49,14 +52,14 @@ class Participation
         return $this;
     }
 
-    public function getParticipant(): User
+    public function getUser(): User
     {
-        return $this->participant;
+        return $this->user;
     }
 
-    public function setParticipant(User $participant): static
+    public function setUser(User $user): static
     {
-        $this->participant = $participant;
+        $this->user = $user;
 
         return $this;
     }

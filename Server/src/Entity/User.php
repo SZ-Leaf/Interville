@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: "`users`")]
+#[ORM\Table(name: "users")]
 class User
 {
     #[ORM\Id]
@@ -61,7 +61,7 @@ class User
     /**
      * @var Collection<int, Participation>
      */
-    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'participant')]
+    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'user')]
     private Collection $participations;
 
     public function __construct()
@@ -235,9 +235,8 @@ class User
     {
         if (!$this->participations->contains($participation)) {
             $this->participations->add($participation);
-            $participation->setParticipant($this);
+            $participation->setUser($this);
         }
-
         return $this;
     }
 

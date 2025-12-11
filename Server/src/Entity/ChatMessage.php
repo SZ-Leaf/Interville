@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
 
 #[ORM\Entity(repositoryClass: ChatMessageRepository::class)]
+#[ORM\Table(name: "chat_messages")]
 class ChatMessage
 {
     #[ORM\Id]

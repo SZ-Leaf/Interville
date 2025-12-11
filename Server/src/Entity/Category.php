@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
-#[ORM\Table(name: "`categories`")]
+#[ORM\Table(name: "categories")]
 class Category
 {
     #[ORM\Id]
@@ -66,8 +66,8 @@ class Category
     }
 
     public function removeChallenge(Challenge $challenge): static
-    {
-        $this->challenges->removeElement($challenge);
-        return $this;
-    }
+{
+    $this->challenges->removeElement($challenge);
+    return $this;
+}
 }
