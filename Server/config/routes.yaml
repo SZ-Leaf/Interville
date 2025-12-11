@@ -9,3 +9,8 @@
 
 controllers:
     resource: routing.controllers
+    prefix: '/api'
+    
+# api_controllers:
+#     resource: '../src/Controller/Api'
+#     prefix: '/api'
