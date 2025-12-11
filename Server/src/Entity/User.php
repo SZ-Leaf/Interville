@@ -64,6 +64,9 @@ class User
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'user')]
     private Collection $participations;
 
+    #[ORM\Column(length: 100)]
+    private ?string $passwordHash = null;
+
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
@@ -243,6 +246,18 @@ class User
     public function removeParticipation(Participation $participation): static
     {
         $this->participations->removeElement($participation);
+        return $this;
+    }
+
+    public function getPasswordHash(): ?string
+    {
+        return $this->passwordHash;
+    }
+
+    public function setPasswordHash(string $passwordHash): static
+    {
+        $this->passwordHash = $passwordHash;
+
         return $this;
     }
 }
