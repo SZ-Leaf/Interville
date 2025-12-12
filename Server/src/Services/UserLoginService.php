@@ -14,8 +14,7 @@ final class UserLoginService
    public function __construct(
       private readonly UserRepository $userRepository,
       private readonly UserPasswordHasherInterface $hasher,
-      private readonly ValidatorInterface $validator,
-      private readonly EntityManagerInterface $em,
+      private readonly ValidatorInterface $validator
    ) {}
 
    /**
@@ -44,7 +43,7 @@ final class UserLoginService
 
       return [
          'email' => $user->getEmail(),
-         'id' => $user->getId(),
+         'role' => strtoupper($user->getRole()->getTitle()),
       ];
    }
 }

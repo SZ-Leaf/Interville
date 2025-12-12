@@ -8,3 +8,6 @@ jose:
         builders:
             jws_builder:
                 signature_algorithms: ['HS256']
+        verifiers:
+            jws_verifier:
+                signature_algorithms: ['HS256']

@@ -24,3 +24,4 @@ services:
     App\Services\AuthService:
         arguments:
             $jwsBuilder: '@jose.jws_builder.jws_builder'
+            $jwsVerifier: '@jose.jws_verifier.jws_verifier'
