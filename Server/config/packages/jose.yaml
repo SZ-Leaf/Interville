@@ -1,0 +1,10 @@
+jose:
+    key_sets:
+        key_name:
+            jwkset: # Method
+                value: '{"keys":[{"kty":"oct","k":"%env(JWT_SECRET)%"}]}'
+
+    jws:
+        builders:
+            jws_builder:
+                signature_algorithms: ['HS256']

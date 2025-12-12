@@ -2,18 +2,23 @@
 
 namespace App\Controller\Api;
 
+use App\DTO\LoginUserRequest;
 use App\DTO\RegisterUserRequest;
+use App\Exception\LoginException;
 use App\Exception\RegistrationException;
+use App\Services\UserLoginService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Services\UserRegistrationService;
 use Symfony\Component\HttpFoundation\Request;
+use App\Services\AuthService;
 
 #[Route('/auth', name: 'api_auth')]
 final class UserController extends AbstractController
 {
     // #[Route('/register', methods: ['POST'])]
+
     // public function register
     // (
     //     Request $req,
@@ -115,10 +120,11 @@ final class UserController extends AbstractController
     //     }
     // }
 
-    public function __construct(private readonly UserRegistrationService $registrationService) {}
+    // public function __construct(private readonly UserRegistrationService $registrationService, private readonly UserLoginService $loginService) {}
 
+    
     #[Route('/register', methods: ['POST'])]
-    public function register(Request $request): JsonResponse
+    public function register(Request $request, UserRegistrationService $registrationService): JsonResponse
     {
         try {
             $payload = $request->toArray();
@@ -131,7 +137,7 @@ final class UserController extends AbstractController
             $dto->password = $payload['password'] ?? null;
             $dto->promo = $payload['promo'] ?? null;
 
-            $result = $this->registrationService->register($dto);
+            $result = $registrationService->register($dto);
 
             return $this->json([
                 'success' => true,
@@ -143,6 +149,48 @@ final class UserController extends AbstractController
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 422);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Server error' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    #[Route('/login', methods: ['POST'])]
+    public function login(Request $request, UserLoginService $loginService, AuthService $authService): JsonResponse
+    {
+        try {
+            $payload = $request->toArray();
+
+            $dto = new LoginUserRequest();
+            $dto->email = $payload['email'] ?? null;
+            $dto->password = $payload['password'] ?? null;
+
+
+            $result = $loginService->login($dto);
+
+            $token = $authService->generateToken($result);
+            
+            $data = [
+                'email' => $result['email'],
+                'id' => $result['id'],
+            ];  
+
+            return $this->json(
+                [
+                    'success' => true,
+                    'message' => 'Login Successful',
+                    'data' => $data,
+                    'token' => $token,
+                ], 200);
+
+        } catch (LoginException $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+
         } catch (\Throwable $e) {
             return $this->json([
                 'success' => false,
