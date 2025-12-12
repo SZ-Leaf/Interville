@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\DTO\LoginUserRequest;
 use App\DTO\RegisterUserRequest;
+use App\DTO\UpdateUserRequest;
 use App\Exception\LoginException;
 use App\Exception\RegistrationException;
 use App\Services\UserLoginService;
@@ -14,6 +15,7 @@ use App\Services\UserRegistrationService;
 use Symfony\Component\HttpFoundation\Request;
 use App\Services\AuthService;
 use App\Services\ProfileService;
+use App\Services\UpdateUserService;
 
 #[Route('/auth', name: 'api_auth')]
 final class UserController extends AbstractController
@@ -134,9 +136,27 @@ final class UserController extends AbstractController
         }
     }
 
-    #[Route('/edit-profile', methods: ['PUT'])]
-    public function editProfile(Request $request, ProfileService $profileService)
+    #[Route('/update-user', methods: ['PUT'])]
+    public function updateUser(Request $request, UpdateUserService $updateUserService)
     {
-        
+        try
+        {
+            $token = $request->headers->get('Authorization');
+
+            if (!$token || !str_starts_with($token, 'Bearer ')) {
+                throw new \RuntimeException('Missing or invalid Authorization header');
+            }
+
+            $token = substr($token, 7);
+
+            $payload = $request->toArray();
+            $dto = new UpdateUserRequest();
+            $dto->firstName = $payload['first_name'];
+            $dto->lastName = $payload['last_name'];
+            $dto->username = $payload['username'];
+
+            $updateUser = $updateUserService->updateUser($dto, $token);
+            
+        }
     }
 }
