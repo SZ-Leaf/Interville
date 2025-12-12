@@ -12,7 +12,7 @@ import PublicRoute from "@/components/auth/PublicRoute";
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-blue-50">
+      <div className="min-h-screen bg-light-blue">
         <Routes>
           {/* 
             Public Routes:
