@@ -7,10 +7,12 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "users")]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -146,6 +148,11 @@ class User
         return $this;
     }
 
+    public function getRoles(): array
+    {
+        return ['ROLE_' . strtoupper($this->role->getTitle())];
+    }
+
     public function getRole(): Role
     {
         return $this->role;
@@ -249,7 +256,7 @@ class User
         return $this;
     }
 
-    public function getPasswordHash(): ?string
+    public function getPassword(): ?string
     {
         return $this->passwordHash;
     }
@@ -259,5 +266,10 @@ class User
         $this->passwordHash = $passwordHash;
 
         return $this;
+    }
+    
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
     }
 }

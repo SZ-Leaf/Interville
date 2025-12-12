@@ -19,9 +19,11 @@
         "symfony/framework-bundle": "8.0.*",
         "symfony/property-access": "8.0.*",
         "symfony/property-info": "8.0.*",
+        "symfony/routing": "*",
         "symfony/runtime": "8.0.*",
         "symfony/security-bundle": "8.0.*",
         "symfony/serializer": "8.0.*",
+        "symfony/validator": "*",
         "symfony/yaml": "8.0.*",
         "web-token/jwt-bundle": "^4.1"
     },
