@@ -1,42 +1,127 @@
-import { CATEGORIES, CITIES, MOCK_CHALLENGES } from "@/mock_challenges";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import {
-  Target,
   Trophy,
   TrendingUp,
   Zap,
-  Calendar,
-  Users,
   MapPin,
-  Search,
   Filter,
-  Clock,
+  Target,
 } from "lucide-react";
-import ChallengeListCard from "../ui/ChallengeListCard";
+import ChallengeListCard from "@/components/ui/ChallengeListCard";
+import * as challengeService from "@/service/challengeService";
+
+// Fallback constants if API doesn't provide them
+const DEFAULT_CATEGORIES = [
+  "Toutes",
+  "Santé & Bien-être",
+  "Développement personnel",
+  "Pleine conscience",
+  "Technologie",
+  "Environnement",
+  "Créativité",
+  "Finance",
+  "Social",
+];
+
+const DEFAULT_CITIES = [
+  "Toutes",
+  "Marseille",
+  "Paris",
+  "Lyon",
+  "Toulouse",
+  "Nice",
+];
 
 function ChallengesList() {
+  const [challenges, setChallenges] = useState([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useState("Toutes");
   const [selectedCity, setSelectedCity] = useState("Toutes");
   const [statusFilter, setStatusFilter] = useState("active");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filteredChallenges = MOCK_CHALLENGES.filter((challenge) => {
-    const categoryMatch =
-      selectedCategory === "Toutes" || challenge.category === selectedCategory;
-    const cityMatch =
-      selectedCity === "Toutes" || challenge.city === selectedCity;
-    const statusMatch =
-      statusFilter === "all" || challenge.status === statusFilter;
-    return categoryMatch && cityMatch && statusMatch;
+  // Stats
+  const [stats, setStats] = useState({
+    activeChallenges: 0,
+    completedChallenges: 0,
+    successRate: 0,
+    consecutiveDays: 0,
   });
+
+  useEffect(() => {
+    fetchChallenges();
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    fetchChallenges();
+  }, [selectedCategory, selectedCity, statusFilter]);
+
+  const fetchChallenges = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const filters = {};
+      if (selectedCategory !== "Toutes") {
+        filters.category = selectedCategory;
+      }
+      if (selectedCity !== "Toutes") {
+        filters.city = selectedCity;
+      }
+      if (statusFilter !== "all") {
+        filters.status = statusFilter;
+      }
+
+      const data = await challengeService.getChallenges(filters);
+      setChallenges(data);
+
+      // Calculate stats (this would ideally come from backend)
+      calculateStats(data);
+    } catch (err) {
+      setError("Échec du chargement des défis. Veuillez réessayer.");
+      console.error("Error fetching challenges:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const data = await challengeService.getCategories();
+      if (data && data.length > 0) {
+        setCategories(["Toutes", ...data.map((cat) => cat.name)]);
+      }
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+      // Use default categories on error
+    }
+  };
+
+  const calculateStats = (challengeData) => {
+    // This is mock calculation - in production this should come from backend
+    setStats({
+      activeChallenges: challengeData.filter((c) => c.status === "active")
+        .length,
+      completedChallenges: challengeData.filter((c) => c.status === "completed")
+        .length,
+      successRate: 87,
+      consecutiveDays: 45,
+    });
+  };
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case "Facile":
+      case "Easy":
         return "bg-tertiary/90 text-slate-700";
       case "Moyen":
+      case "Medium":
         return "bg-yellow-100 text-yellow-700";
       case "Difficile":
+      case "Hard":
         return "bg-red-100 text-red-700";
       default:
         return "bg-neutral-gray/10 text-neutral-gray";
@@ -84,28 +169,30 @@ function ChallengesList() {
         <div className="bg-gradient-to-br from-primary to-secondary rounded-xl p-6 text-white shadow-lg shadow-primary/20">
           <div className="flex items-center justify-between mb-2">
             <Target className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">12</span>
+            <span className="text-2xl font-bold">{stats.activeChallenges}</span>
           </div>
           <p className="opacity-90 font-medium">Vos défis actifs</p>
         </div>
         <div className="bg-gradient-to-br from-secondary to-tertiary rounded-xl p-6 text-white shadow-lg shadow-secondary/20">
           <div className="flex items-center justify-between mb-2">
             <Trophy className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">8</span>
+            <span className="text-2xl font-bold">
+              {stats.completedChallenges}
+            </span>
           </div>
           <p className="opacity-90 font-medium">Terminés</p>
         </div>
         <div className="bg-gradient-to-br from-tertiary to-secondary rounded-xl p-6 text-white shadow-lg shadow-tertiary/20">
           <div className="flex items-center justify-between mb-2">
             <TrendingUp className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">87%</span>
+            <span className="text-2xl font-bold">{stats.successRate}%</span>
           </div>
           <p className="opacity-90 font-medium">Taux de réussite</p>
         </div>
         <div className="bg-accent-light rounded-xl p-6 text-gray-700 shadow-lg shadow-accent/20">
           <div className="flex items-center justify-between mb-2">
             <Zap className="w-8 h-8 opacity-80" />
-            <span className="text-2xl font-bold">45</span>
+            <span className="text-2xl font-bold">{stats.consecutiveDays}</span>
           </div>
           <p className="opacity-90 font-medium">Jours consécutifs</p>
         </div>
@@ -120,7 +207,7 @@ function ChallengesList() {
               Catégories
             </label>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
@@ -149,7 +236,7 @@ function ChallengesList() {
                   onChange={(e) => setSelectedCity(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-neutral-gray/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none bg-white text-dark-text"
                 >
-                  {CITIES.map((city) => (
+                  {DEFAULT_CITIES.map((city) => (
                     <option key={city} value={city}>
                       {city}
                     </option>
@@ -180,22 +267,47 @@ function ChallengesList() {
           </div>
         </div>
       </div>
-      {/* Challenges Grid */}
-      <ChallengeListCard
-        filteredChallenges={filteredChallenges}
-        getStatusBadge={getStatusBadge}
-        getDifficultyColor={getDifficultyColor}
-      />
 
-      {filteredChallenges.length === 0 && (
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-neutral-gray">Chargement des défis...</p>
+        </div>
+      )}
+
+      {/* Challenges Grid */}
+      {!isLoading && !error && (
+        <ChallengeListCard
+          filteredChallenges={challenges}
+          getStatusBadge={getStatusBadge}
+          getDifficultyColor={getDifficultyColor}
+        />
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && challenges.length === 0 && (
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 text-neutral-gray/30 mx-auto mb-4" />
           <h3 className="text-xl text-dark-text mb-2 font-bold">
             Aucun défi trouvé
           </h3>
-          <p className="text-neutral-gray">
+          <p className="text-neutral-gray mb-4">
             Essayez d&apos;ajuster vos filtres ou créez un nouveau défi
           </p>
+          <Link
+            to="/create-challenge"
+            className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Créer un défi
+          </Link>
         </div>
       )}
     </div>
