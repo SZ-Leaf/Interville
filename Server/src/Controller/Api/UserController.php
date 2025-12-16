@@ -7,6 +7,7 @@ use App\DTO\RegisterUserRequest;
 use App\DTO\UpdateUserRequest;
 use App\Exception\LoginException;
 use App\Exception\RegistrationException;
+use App\Exception\UpdateUserException;
 use App\Services\UserLoginService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,7 +16,7 @@ use App\Services\UserRegistrationService;
 use Symfony\Component\HttpFoundation\Request;
 use App\Services\AuthService;
 use App\Services\ProfileService;
-use App\Services\UpdateUserService;
+use App\Services\UserUpdateService;
 
 #[Route('/auth', name: 'api_auth')]
 final class UserController extends AbstractController
@@ -105,14 +106,14 @@ final class UserController extends AbstractController
     public function profile(Request $request, ProfileService $profileService): JsonResponse
     {
         try {
-            $token = $request->headers->get('Authorization');
+            $bearer = $request->headers->get('Authorization');
 
             // Check if the header exists and starts with "Bearer "
-            if (!$token || !str_starts_with($token, 'Bearer ')) {
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
                 throw new \RuntimeException('Missing or invalid Authorization header');
             }
             
-            $token = substr($token, 7); // 7 = length of "Bearer "
+            $token = substr($bearer, 7); // 7 = length of "Bearer "
 
             $result = $profileService->getProfile($token);
 
@@ -137,26 +138,62 @@ final class UserController extends AbstractController
     }
 
     #[Route('/update-user', methods: ['PUT'])]
-    public function updateUser(Request $request, UpdateUserService $updateUserService)
+    public function updateUser(Request $request, UserUpdateService $updateUserService, AuthService $authService): JsonResponse
     {
         try
         {
-            $token = $request->headers->get('Authorization');
+            $bearer = $request->headers->get('Authorization');
 
-            if (!$token || !str_starts_with($token, 'Bearer ')) {
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
                 throw new \RuntimeException('Missing or invalid Authorization header');
             }
 
-            $token = substr($token, 7);
+            $token = substr($bearer, 7);
+
+            // $decoded = $authService->verifyToken($token);
 
             $payload = $request->toArray();
             $dto = new UpdateUserRequest();
-            $dto->firstName = $payload['first_name'];
-            $dto->lastName = $payload['last_name'];
-            $dto->username = $payload['username'];
+            $dto->firstName = isset($payload['first_name']) ? trim($payload['first_name']) : null;
+            $dto->lastName = isset($payload['last_name']) ? trim($payload['last_name']) : null;
+            $dto->username = isset($payload['username']) ? trim($payload['username']) : null;
 
             $updateUser = $updateUserService->updateUser($dto, $token);
-            
+
+            // preventing circular reference serialization
+            $data = [
+                'id' => $updateUser->getId(),
+                'first_name' => $updateUser->getFirstName(),
+                'last_name' => $updateUser->getLastName(),
+                'username' => $updateUser->getUsername(),
+                'role' => 'ROLE_' . strtoupper($updateUser->getRole()?->getTitle()),
+            ];
+
+            return $this->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'data' => $data,
+            ], 201);
+        }
+        catch (UpdateUserException $err){
+            return $this->json([
+                'success' => false,
+                'message' => $err->getMessage(),
+            ], 422);
+
+        }
+        catch (\RuntimeException $err) {
+            return $this->json([
+                'success' => false,
+                'message' => $err->getMessage(),
+            ], 401);
+
+        }
+        catch (\Throwable $err){
+            return $this->json([
+                'success' => false,
+                'message' => 'Server error' . $err->getMessage(),
+            ], 500);
         }
     }
 }

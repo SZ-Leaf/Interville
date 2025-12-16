@@ -71,6 +71,5 @@ class AuthService
       // What it does: Decodes the token payload.
       // Purpose: The token payload is decoded into an array.
       return json_decode($jws->getPayload(), true);
-
    }
 }

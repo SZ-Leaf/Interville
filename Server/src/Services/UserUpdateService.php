@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 
-final class UpdateUserService
+final class UserUpdateService
 {
    public function __construct(
       private readonly UserRepository $userRepository,
@@ -20,6 +20,15 @@ final class UpdateUserService
 
    public function updateUser(UpdateUserRequest $dto, string $token)
    {
+
+      $violations = $this->validator->validate($dto);
+      if(count($violations) > 0){
+         $errs = [];
+         foreach($violations as $v){
+            $errs[] = sprintf('%s: %s', $v->getPropertyPath(), $v->getMessage());
+         }
+         throw new UpdateUserException(implode('; ', $errs));
+      }
       
       $payload = $this->authService->verifyToken($token);
       if (!$payload || empty($payload['email'])) {
@@ -29,16 +38,7 @@ final class UpdateUserService
       $user = $this->userRepository->findOneBy(['email' => $payload['email']]);
       if(!$user)
       {
-         throw new \RuntimeException('User not found');
-      }
-
-      $violations = $this->validator->validate($dto);
-      if(count($violations) > 0){
-         $errs = [];
-         foreach($violations as $v){
-            $errs[] = sprintf('%s: %s', $v->getPropertyPath(), $v->getMessage());
-         }
-         throw new UpdateUserException(implode('; ', $errs));
+         throw UpdateUserException::userNotFound();
       }
 
       if($dto->firstName !== null && $dto->firstName !== '')
@@ -54,7 +54,7 @@ final class UpdateUserService
       if ($dto->username !== null && $dto->username !== '') {
          $existing = $this->userRepository->findOneBy(['username' => $dto->username]);
          if ($existing && $existing->getId() !== $user->getId()) {
-             throw new UpdateUserException('Username is already taken.');
+             throw UpdateUserException::usernameExists();
          }
          $user->setUsername($dto->username);
       }
