@@ -27,7 +27,7 @@ final class ProfileService
          'first_name' => $user->getFirstName(),
          'last_name' => $user->getLastName(),
          'username' => $user->getUsername(),
-         'promo' => $user->getPromo()?->getCity() . ' ' . $user->getPromo()?->getYear() ?? null,
+         'promo' => ($promo = $user->getPromo()) ? ($promo->getCity() . ' ' . $promo->getYear()) : null,
          'role' => "ROLE_" . strtoupper($user->getRole()->getTitle()),
          'validated' => $user->isValidated(),
          'verified' => $user->isVerified(),
