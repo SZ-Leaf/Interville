@@ -10,4 +10,7 @@
   --color-accent: #ff3f0a;
   --color-accent-light: #ffa773;
   --color-steel: #8898a0;
+
+  --color-accent: var(--accent);
 }
+
