@@ -65,22 +65,62 @@ final class PromoController extends AbstractController
     }
 
     #[Route('promo/delete/{id}', name: 'app_api_promo_delete', methods: ['DELETE'])]
-    public function delete(int $id, EntityManagerInterface $em, ValidatorInterface $validator) {
-        $promo = $em->getRepository(Promo::class)->find($id);
+    public function delete(int $id, EntityManagerInterface $em, ValidatorInterface $validator)
+    {
+        try {
+            $promo = $em->getRepository(Promo::class)->find($id);
 
-        if (!$promo) {
+            if (!$promo) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Promo not found'
+                ], 404);
+            }
+            $em->remove($promo);
+            $em->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Promo deleted successfully'
+            ], 200);
+
+        } catch (\Throwable $e) {
             return $this->json([
                 'success' => false,
-                'message' => 'Promo not found'
-            ], 404);
+                'message' => "Error while trying to delete the promo : " . $e->getMessage()
+            ]);
         }
-        $em->remove($promo);
-        $em->flush();
 
-        return $this->json([
-            'success' => true,
-            'message' => 'Promo deleted successfully'
-        ], 200);
+    }
+
+    #[Route('promo/get/all', name: 'app_api_promo_get_all', methods: ['GET'])]
+    public function getAll(EntityManagerInterface $em)
+    {
+        try {
+            $allPromo = $em->getRepository(Promo::class)->findAll();
+
+            if (count($allPromo) <= 0) {
+                return $this->json([
+                    'success' => true,
+                    'message' => "There's no promo in the database",
+                    "data" => []
+                ], 200);
+            }
+
+            return $this->json([
+                'success' => true,
+                'message' => "Promos returned with success",
+                'data' => $allPromo
+            ]);
+
+        } catch (\Throwable $e) {
+            return $this->json([
+                'success' => false,
+                'message' => "Error while trying to get all promos : " . $e->getMessage(),
+                'data' => []
+            ]);
+        }
+
     }
 
 }
