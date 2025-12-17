@@ -22,7 +22,7 @@ final class PromoController extends AbstractController
             $data = json_decode($request->getContent(), true);
 
             $dto = new CreatePromoRequest();
-            $dto->city = $data['city'];
+            $dto->city = trim($data['city']);
             $dto->year = $data['year'];
 
 
