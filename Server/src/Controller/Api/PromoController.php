@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Promo;
-use App\DTO\CreatePromoRequest;
+use App\DTO\Promo\CreatePromoRequest;
 
 final class PromoController extends AbstractController
 {

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
 use App\Repository\UserRepository;
+use App\Services\Auth\AuthService;
 
 final class ProfileService
 {

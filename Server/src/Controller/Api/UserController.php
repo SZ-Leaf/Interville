@@ -2,21 +2,21 @@
 
 namespace App\Controller\Api;
 
-use App\DTO\LoginUserRequest;
-use App\DTO\RegisterUserRequest;
-use App\DTO\UpdateUserRequest;
-use App\Exception\LoginException;
-use App\Exception\RegistrationException;
-use App\Exception\UpdateUserException;
-use App\Services\UserLoginService;
+use App\DTO\User\LoginUserRequest;
+use App\DTO\User\RegisterUserRequest;
+use App\DTO\User\UpdateUserRequest;
+use App\Exception\User\LoginException;
+use App\Exception\User\RegistrationException;
+use App\Exception\User\UpdateUserException;
+use App\Services\User\UserLoginService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Services\UserRegistrationService;
+use App\Services\User\UserRegistrationService;
 use Symfony\Component\HttpFoundation\Request;
-use App\Services\AuthService;
-use App\Services\ProfileService;
-use App\Services\UserUpdateService;
+use App\Services\Auth\AuthService;
+use App\Services\User\ProfileService;
+use App\Services\User\UserUpdateService;
 
 #[Route('/auth', name: 'api_auth')]
 final class UserController extends AbstractController

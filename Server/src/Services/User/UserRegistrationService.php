@@ -1,10 +1,10 @@
 <?php
 // src/Service/UserRegistrationService.php
-namespace App\Services;
+namespace App\Services\User;
 
-use App\DTO\RegisterUserRequest;
-use App\Factory\UserFactory;
-use App\Exception\RegistrationException;
+use App\DTO\User\RegisterUserRequest;
+use App\Factory\User\UserFactory;
+use App\Exception\User\RegistrationException;
 use App\Repository\PromoRepository;
 use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
