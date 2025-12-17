@@ -2,14 +2,16 @@
 
 namespace App\Controller\Api;
 
+use App\DTO\Category\UpdateCategoryRequest;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpParser\Node\Stmt\TryCatch;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Category;
-use App\DTO\CreateCategoryRequest;
+use App\DTO\Category\CreateCategoryRequest;
 
 final class CategoryController extends AbstractController
 {
@@ -21,7 +23,7 @@ final class CategoryController extends AbstractController
             $data = json_decode($request->getContent(), true);
 
             $dto = new CreateCategoryRequest();
-            $dto->name = $data['name'];
+            $dto->name = trim($data['name']);
 
             $errors = $validator->validate($dto);
 
@@ -98,7 +100,7 @@ final class CategoryController extends AbstractController
                 return $this->json([
                     'success' => false,
                     'message' => "Category not found",
-                    'data' => (object)[]
+                    'data' => (object) []
                 ], 404);
             }
 
@@ -111,7 +113,84 @@ final class CategoryController extends AbstractController
             return $this->json([
                 "success" => false,
                 "message" => "Error while to get the category : " . $e->getMessage(),
-                "data" => (object)[]
+                "data" => (object) []
+            ], 500);
+        }
+    }
+
+    #[Route('/category/update/{id}', name: 'app_api_category_updatecategory', methods: ['PUT'])]
+    public function update(int $id, EntityManagerInterface $em, Request $request, ValidatorInterface $validator)
+    {
+        try {
+            $category = $em->getRepository(Category::class)->find($id);
+
+            if (!$category) {
+                return $this->json([
+                    'success' => false,
+                    'message' => "Category not found"
+                ], 404);
+            }
+
+            $data = json_decode($request->getContent(), true);
+
+            $dto = new UpdateCategoryRequest();
+            $dto->name = trim($data['name']);
+
+            $errors = $validator->validate($dto);
+
+            if (count($errors) > 0) {
+                $errorsMessages = [];
+                foreach ($errors as $error) {
+                    $errorsMessages[] = [
+                        'property' => $error->getPropertyPath(),
+                        'message' => $error->getMessage()
+                    ];
+                }
+                return $this->json([
+                    'success' => false,
+                    'message' => $errorsMessages
+                ], 400);
+            }
+
+            $category->setTitle($dto->name);
+            $em->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => "Category updated with success !"
+            ], 200);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'success' => false,
+                'message' => "Error while trying to update the category : " . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('category/delete/{id}')]
+    public function delete(int $id, EntityManagerInterface $em)
+    {
+        try {
+            $category = $em->getRepository(Category::class)->find($id);
+
+            if (!$category) {
+                return $this->json([
+                    'success' => false,
+                    'message' => "Category not found"
+                ], 404);
+            }
+
+            $em->remove($category);
+            $em->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => "Category deleted successfully"
+            ], 200);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'success' => false,
+                'message' => "Error while trying to delete the category : " . $e->getMessage()
             ], 500);
         }
     }
