@@ -18,7 +18,7 @@ final class CategoryController extends AbstractController
         try {
             
             $data = json_decode($request->getContent(), true);
-
+            
             $dto = new CreateCategoryRequest();
             $dto->name = $data['name'];
 
@@ -55,6 +55,33 @@ final class CategoryController extends AbstractController
             return $this->json([
                 'success' => false,
                 'message' => "Error while trying to create a new category : " . $e->getMessage()
+            ]);
+        }
+    }
+
+    #[Route('category/get/all', name: 'app_api_category_get_all', methods: ['GET'])]
+    public function getAll(EntityManagerInterface $em) {
+        try {
+            $allCategories = $em->getRepository(Category::class)->findAll();
+
+            if (count($allCategories) <= 0) {
+                return $this->json([
+                    'success' => true,
+                    'message' => "There's no category in the database",
+                    'data' => []
+                ]);
+            }
+
+            return $this->json([
+                'success' => true,
+                'message' => "Categories returned with success",
+                'data' => $allCategories
+            ]);
+
+        } catch (\Throwable $e) {
+            return $this->json([
+                'success' => false,
+                'message' => "Error while trying to get all categories : " . $e->getMessage()
             ]);
         }
     }
