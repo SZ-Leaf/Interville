@@ -21,7 +21,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-    App\Services\AuthService:
+    App\Services\Auth\AuthService:
         arguments:
             $jwsBuilder: '@jose.jws_builder.jws_builder'
             $jwsVerifier: '@jose.jws_verifier.jws_verifier'

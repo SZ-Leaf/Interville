@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
-use App\DTO\UpdateUserRequest;
-use App\Exception\UpdateUserException;
+use App\DTO\User\UpdateUserRequest;
+use App\Exception\User\UpdateUserException;
 use App\Repository\UserRepository;
+use App\Services\Auth\AuthService;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\User;
 
 final class UserUpdateService
 {

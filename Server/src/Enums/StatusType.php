@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum StatusType: string
 {
-   case WAITING = "Waiting";
-   case STARTED = "Started";
-   case FINISHED = "Finished";
+   case WAITING = "waiting";
+   case STARTED = "started";
+   case FINISHED = "finished";
 }

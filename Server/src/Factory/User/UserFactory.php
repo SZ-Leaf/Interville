@@ -1,5 +1,5 @@
 <?php
-namespace App\Factory;
+namespace App\Factory\User;
 
 use App\Entity\User;
 use App\Entity\Promo;

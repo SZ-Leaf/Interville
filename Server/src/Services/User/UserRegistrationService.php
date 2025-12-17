@@ -1,10 +1,10 @@
 <?php
 // src/Service/UserRegistrationService.php
-namespace App\Services;
+namespace App\Services\User;
 
-use App\DTO\RegisterUserRequest;
-use App\Factory\UserFactory;
-use App\Exception\RegistrationException;
+use App\DTO\User\RegisterUserRequest;
+use App\Factory\User\UserFactory;
+use App\Exception\User\RegistrationException;
 use App\Repository\PromoRepository;
 use App\Repository\RoleRepository;
 use App\Repository\UserRepository;
@@ -19,7 +19,7 @@ final class UserRegistrationService
       private readonly PromoRepository $promoRepository,
       private readonly RoleRepository $roleRepository,
       private readonly UserPasswordHasherInterface $hasher,
-      private readonly UserFactory $factory,
+      private readonly UserFactory $userFactory,
       private readonly ValidatorInterface $validator,
       private readonly EntityManagerInterface $em,
    ) {}
@@ -75,7 +75,7 @@ final class UserRegistrationService
       $passwordHash = $this->hasher->hashPassword($dummyUserForHasher, $dto->password);
 
       // 7. Build user entity
-      $user = $this->factory->createFromData(
+      $user = $this->userFactory->createFromData(
          $dto->email,
          $dto->firstName,
          $dto->lastName,

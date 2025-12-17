@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Auth;
 
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Core\JWK;

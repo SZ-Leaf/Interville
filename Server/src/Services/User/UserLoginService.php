@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
-use App\DTO\LoginUserRequest;
-use App\Exception\LoginException;
+use App\DTO\User\LoginUserRequest;
+use App\Exception\User\LoginException;
 use App\Repository\UserRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
