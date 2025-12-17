@@ -2,7 +2,6 @@
 
 namespace App\DTO\Challenge;
 
-use App\Enums\StatusType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CreateChallengeRequest
@@ -16,15 +15,12 @@ class CreateChallengeRequest
    public ?string $details = null;
 
    #[Assert\NotBlank]
-   #[Assert\Choice(choices: StatusType::cases())]
-   public ?StatusType $status = null;
+   // #[Assert\Type(type: 'datetime')]
+   public ?string $startDate = null;
 
    #[Assert\NotBlank]
-   #[Assert\Type(type: 'datetime')]
-   public ?\DateTime $startDate = null;
-
-   #[Assert\Type(type: 'datetime')]
-   public ?\DateTime $finishDate = null;
+   // #[Assert\Type(type: 'datetime')]
+   public ?string $finishDate = null;
 
    #[Assert\NotBlank]
    public ?string $category = null;

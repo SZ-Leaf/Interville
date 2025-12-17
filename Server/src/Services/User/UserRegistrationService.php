@@ -19,7 +19,7 @@ final class UserRegistrationService
       private readonly PromoRepository $promoRepository,
       private readonly RoleRepository $roleRepository,
       private readonly UserPasswordHasherInterface $hasher,
-      private readonly UserFactory $factory,
+      private readonly UserFactory $userFactory,
       private readonly ValidatorInterface $validator,
       private readonly EntityManagerInterface $em,
    ) {}
@@ -75,7 +75,7 @@ final class UserRegistrationService
       $passwordHash = $this->hasher->hashPassword($dummyUserForHasher, $dto->password);
 
       // 7. Build user entity
-      $user = $this->factory->createFromData(
+      $user = $this->userFactory->createFromData(
          $dto->email,
          $dto->firstName,
          $dto->lastName,
