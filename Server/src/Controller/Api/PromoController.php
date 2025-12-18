@@ -2,6 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Services\Auth\AuthService;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,9 +17,33 @@ final class PromoController extends AbstractController
 {
 
     #[Route('promo/add', name: 'app_api_promo_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, AuthService $authService, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         try {
+
+            $bearer = $request->headers->get('Authorization');
+
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Missing or invalid Authorization header'
+                ]);
+            }
+
+            $token = substr($bearer, 7); // 7 = length of "Bearer "
+            $decoded = $authService->verifyToken($token);
+
+            $userEmail = $decoded['email'];
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $userEmail]);
+            $userRole = $user->getRole()->getTitle();
+
+            if ($userRole === "user") {
+                return $this->json([
+                    'success' => false,
+                    'message' => "Unauthorized"
+                ], 401);
+            }
+
 
             $data = json_decode($request->getContent(), true);
 
@@ -65,9 +91,33 @@ final class PromoController extends AbstractController
     }
 
     #[Route('promo/delete/{id}', name: 'app_api_promo_delete', methods: ['DELETE'])]
-    public function delete(int $id, EntityManagerInterface $em, ValidatorInterface $validator)
+    public function delete(int $id, EntityManagerInterface $em,Request $request,AuthService $authService, ValidatorInterface $validator)
     {
         try {
+            $bearer = $request->headers->get('Authorization');
+
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Missing or invalid Authorization header'
+                ]);
+            }
+
+            $token = substr($bearer, 7); // 7 = length of "Bearer "
+            $decoded = $authService->verifyToken($token);
+
+            $userEmail = $decoded['email'];
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $userEmail]);
+            $userRole = $user->getRole()->getTitle();
+
+            if ($userRole === "user") {
+                return $this->json([
+                    'success' => false,
+                    'message' => "Unauthorized"
+                ], 401);
+            }
+
+
             $promo = $em->getRepository(Promo::class)->find($id);
 
             if (!$promo) {
