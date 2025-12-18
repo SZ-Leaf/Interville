@@ -71,6 +71,7 @@ final class UserController extends AbstractController
             $tokenPayload = [
                 'email' => $result['email'],
                 'role' => "ROLE_" . strtoupper($result['role']),
+                'id' => $result['id']
             ];
 
             $token = $authService->generateToken($tokenPayload);

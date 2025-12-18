@@ -12,6 +12,7 @@ use App\Exception\Challenge\CreateChallengeException;
 use Symfony\Component\HttpFoundation\Request;
 use App\Services\Auth\AuthService;
 use App\Services\Challenge\ChallengeCreateService;
+use App\Services\Challenge\ChallengeDeleteService;
 
 #[Route('/challenges', name: 'app_api_challenge')]
 final class ChallengeController extends AbstractController
@@ -21,6 +22,39 @@ final class ChallengeController extends AbstractController
     {
         $challenges = $em->getRepository(Challenge::class)->findAll();
         return $this->json($challenges, 200);
+    }
+
+    #[Route('/{id}', methods: ['GET'])]
+    public function getChallenge(EntityManagerInterface $em, int $id): JsonResponse
+    {
+        $challenge = $em->getRepository(Challenge::class)->findOneBy(['id' => $id]);
+
+        if(!$challenge)
+        {
+            return $this->json([
+                'success' => false,
+                'message' => 'Challenge not found'
+            ], 404);
+        }
+
+        $challenge = [
+            'id' => $challenge->getId(),
+            'title' => $challenge->getTitle(),
+            'details' => $challenge->getDetails(),
+            'category' => $challenge->getCategory()->getTitle(),
+            'created_at' => $challenge->getCreatedAt()->format('Y-m-d H:i:s'),
+            'start_date' => $challenge->getStartDate()->format('Y-m-d H:i:s'),
+            'finish_date' => $challenge->getFinishDate()->format('Y-m-d H:i:s'),
+            'status' => $challenge->getStatus(),
+            'owner' => $challenge->getOwner()->getUsername(),
+            'participations' => $challenge->getParticipations()->count(),
+        ];
+
+        return $this->json([
+            'success' => true,
+            'message' => 'Challenge found',
+            'data' => $challenge
+        ], 200);
     }
 
     #[Route('/create', methods: ['POST'])]
@@ -92,9 +126,39 @@ final class ChallengeController extends AbstractController
 
     }
 
-    #[Route('/delete', methods: 'DELETE')]
-    public function deleteChallenge(Request $request, AuthService $authService, EntityManagerInterface $em)
+    #[Route('/delete/{id}', methods: ['DELETE'])]
+    public function deleteChallenge(Request $request, AuthService $authService, EntityManagerInterface $em, ChallengeDeleteService $challengeDeleteService, int $id)
     {
-        
+        try{
+
+            $bearer = $request->headers->get('Authorization');
+
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
+                throw new \RuntimeException('Missing or invalid Authorization header');
+            }
+
+            $token = substr($bearer, 7);
+            $decoded = $authService->verifyToken($token);
+            $user_id = $decoded['id'];
+
+            $challengeDeleteService->deleteChallenge($id, $user_id);
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Challenge deleted successfully'
+            ]);
+        }
+        catch (\RuntimeException $err) {
+            return $this->json([
+                'success' => false,
+                'message' => $err->getMessage()
+            ], 401);
+
+        } catch (\Throwable $err) {
+            return $this->json([
+                'success' => false,
+                'message' => $err->getMessage()
+            ], 500);
+        }
     }
 }

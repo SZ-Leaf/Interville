@@ -44,6 +44,7 @@ final class UserLoginService
       return [
          'email' => $user->getEmail(),
          'role' => strtoupper($user->getRole()->getTitle()),
+         'id' => $user->getId(),
       ];
    }
 }
