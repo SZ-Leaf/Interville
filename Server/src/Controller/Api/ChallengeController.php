@@ -54,6 +54,7 @@ final class ChallengeController extends AbstractController
                 'category' => $createdChallenge->getCategory()?->getTitle(),
                 'created_at' => $createdChallenge->getCreatedAt(),
                 'start_date' => $createdChallenge->getStartDate(),
+                'finish_date' => $createdChallenge->getFinishDate(),
             ];
 
             return $this->json([
@@ -91,7 +92,7 @@ final class ChallengeController extends AbstractController
 
     }
 
-    #[Route('/delete', method: 'DELETE')]
+    #[Route('/delete', methods: 'DELETE')]
     public function deleteChallenge(Request $request, AuthService $authService, EntityManagerInterface $em)
     {
         
