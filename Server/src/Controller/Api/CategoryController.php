@@ -3,6 +3,8 @@
 namespace App\Controller\Api;
 
 use App\DTO\Category\UpdateCategoryRequest;
+use App\Services\Auth\AuthService;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpParser\Node\Stmt\TryCatch;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,9 +18,31 @@ use App\DTO\Category\CreateCategoryRequest;
 final class CategoryController extends AbstractController
 {
     #[Route('/category/add', name: 'app_api_category_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request,AuthService $authService, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         try {
+            $bearer = $request->headers->get('Authorization');
+
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Missing or invalid Authorization header'
+                ]);
+            }
+
+            $token = substr($bearer, 7); // 7 = length of "Bearer "
+            $decoded = $authService->verifyToken($token);
+
+            $userEmail = $decoded['email'];
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $userEmail]);
+            $userRole = $user->getRole()->getTitle();
+
+            if ($userRole === "user") {
+                return $this->json([
+                    'success' => false,
+                    'message' => "Unauthorized"
+                ], 401);
+            }
 
             $data = json_decode($request->getContent(), true);
 
@@ -119,9 +143,32 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/category/update/{id}', name: 'app_api_category_updatecategory', methods: ['PUT'])]
-    public function update(int $id, EntityManagerInterface $em, Request $request, ValidatorInterface $validator)
+    public function update(int $id,AuthService $authService, EntityManagerInterface $em, Request $request, ValidatorInterface $validator)
     {
         try {
+            $bearer = $request->headers->get('Authorization');
+
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Missing or invalid Authorization header'
+                ]);
+            }
+
+            $token = substr($bearer, 7); // 7 = length of "Bearer "
+            $decoded = $authService->verifyToken($token);
+
+            $userEmail = $decoded['email'];
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $userEmail]);
+            $userRole = $user->getRole()->getTitle();
+
+            if ($userRole === "user") {
+                return $this->json([
+                    'success' => false,
+                    'message' => "Unauthorized"
+                ], 401);
+            }
+
             $category = $em->getRepository(Category::class)->find($id);
 
             if (!$category) {
@@ -168,9 +215,32 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('category/delete/{id}')]
-    public function delete(int $id, EntityManagerInterface $em)
+    public function delete(int $id, EntityManagerInterface $em, Request $request, AuthService $authService)
     {
         try {
+            $bearer = $request->headers->get('Authorization');
+
+            if (!$bearer || !str_starts_with($bearer, 'Bearer ')) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Missing or invalid Authorization header'
+                ]);
+            }
+
+            $token = substr($bearer, 7); // 7 = length of "Bearer "
+            $decoded = $authService->verifyToken($token);
+
+            $userEmail = $decoded['email'];
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $userEmail]);
+            $userRole = $user->getRole()->getTitle();
+
+            if ($userRole === "user") {
+                return $this->json([
+                    'success' => false,
+                    'message' => "Unauthorized"
+                ], 401);
+            }
+
             $category = $em->getRepository(Category::class)->find($id);
 
             if (!$category) {
