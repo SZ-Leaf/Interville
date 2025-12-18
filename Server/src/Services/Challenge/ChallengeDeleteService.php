@@ -13,7 +13,8 @@ final class ChallengeDeleteService
    public function __construct(
       private readonly ChallengeRepository $challengeRepository,
       private readonly EntityManagerInterface $em,
-      private readonly UserRepository $userRepository
+      private readonly UserRepository $userRepository,
+      private readonly ChallengeAuthorizationService $challengeAuthorizationService
    )
    {}
 
@@ -31,14 +32,7 @@ final class ChallengeDeleteService
          throw new AccessDeniedException('User not found');
       }
 
-      $isOwner = $user->getId() === $challenge->getOwner()->getId();
-      $isAdminOrMod = 
-                     in_array('ROLE_ADMIN', $user->getRoles(), true)
-                  || in_array('ROLE_MOD', $user->getRoles(), true);
-
-      if (!$isOwner && !$isAdminOrMod) {
-         throw new AccessDeniedException('User not allowed to delete the challenge');
-      }
+      $this->challengeAuthorizationService->assertCanModify($challenge, $user);
 
       $this->em->remove($challenge);
       $this->em->flush();
